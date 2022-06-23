@@ -1,4 +1,4 @@
 
 *.pq
-.idea/vcs.xml
+.idea/
 *.pyc
