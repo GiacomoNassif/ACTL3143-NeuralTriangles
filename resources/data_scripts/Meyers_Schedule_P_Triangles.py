@@ -72,8 +72,7 @@ def ETL() -> pl.DataFrame:
     stacked_data = stacked_data.sort('Development Lag').with_column(
         (
                 pl.col('Cumulative Paid Loss') -
-                pl.col('Cumulative Paid Loss')
-                .shift_and_fill(periods=1, fill_value=0)
+                pl.col('Cumulative Paid Loss').shift_and_fill(periods=1, fill_value=0)
         ).over(['Group Code', 'Accident Year', 'Line of Business']).alias('Incremental Paid Loss')
     )
 
