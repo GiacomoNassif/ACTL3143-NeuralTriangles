@@ -30,22 +30,22 @@ used_companies = pl.DataFrame([
 
 keras_data = p_triangle_df.sort('Development Lag').with_columns([
     (
-        pl.concat_list([pl.col('Incremental Paid Loss: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(9)][::-1])
+        pl.concat_list([pl.col('Incremental Paid Loss: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(1, 9 + 1)][::-1])
             .alias('Incremental Loss: Input')
     ).over(['Group Code', 'Accident Year', 'Line of Business']),
 
     (
-        pl.concat_list([pl.col('Case Reserves: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(9)][::-1])
+        pl.concat_list([pl.col('Case Reserves: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(1, 9 + 1)][::-1])
             .alias('Case Reserves: Input')
     ).over(['Group Code', 'Accident Year', 'Line of Business']),
 
     (
-        pl.concat_list([pl.col('Incremental Paid Loss: Loss Ratio').shift_and_fill(-i, _MASK_VALUE) for i in range(1, 9 + 1)])
+        pl.concat_list([pl.col('Incremental Paid Loss: Loss Ratio').shift_and_fill(-i, _MASK_VALUE) for i in range(9)])
             .alias('Incremental Loss: Output')
     ).over(['Group Code', 'Accident Year', 'Line of Business']),
 
     (
-        pl.concat_list([pl.col('Case Reserves: Loss Ratio').shift_and_fill(-i, _MASK_VALUE) for i in range(1, 9 + 1)])
+        pl.concat_list([pl.col('Case Reserves: Loss Ratio').shift_and_fill(-i, _MASK_VALUE) for i in range(9)])
             .alias('Case Reserves: Output')
     ).over(['Group Code', 'Accident Year', 'Line of Business']),
 
