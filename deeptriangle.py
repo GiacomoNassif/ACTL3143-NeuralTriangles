@@ -3,6 +3,7 @@ import numpy as np
 from keras.layers import Embedding, Masking, GRU, Flatten, RepeatVector, Concatenate, TimeDistributed, Dense, \
     Dropout, IntegerLookup
 
+
 def get_deep_triangle(company_codes: np.ndarray):
     company_code = keras.Input(
         shape=(1,),
@@ -50,7 +51,7 @@ def get_deep_triangle(company_codes: np.ndarray):
         case_reserves_output
     )
 
-    paid_output = TimeDistributed(Dense(units=64, activation='relu'))(decoded)
+    paid_output = TimeDistributed(Dense(units=64, activation='relu'))(history_and_company_code)
     paid_output = TimeDistributed(Dropout(rate=0.2))(paid_output)
     paid_output = TimeDistributed(Dense(units=1, activation='relu'), name='Paid_Output')(paid_output)
 
