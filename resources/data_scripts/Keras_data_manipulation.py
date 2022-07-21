@@ -1,3 +1,4 @@
+import numpy as np
 import polars as pl
 import pandas as pd
 from resources.data_scripts.Add_Features_To_Meyers_P import get_decorated_p_triangles
@@ -70,6 +71,30 @@ keras_data = keras_data.select([
 
 model_data = keras_data.collect().partition_by(['Fitting Bucket', 'Line of Business'], as_dict=True)
 
-training_data = model_data[('Train', 'Private passenger auto')].drop(['Fitting Bucket', 'Line of Business']).to_numpy()
-validation_data = model_data[('Validation', 'Private passenger auto')].drop(['Fitting Bucket', 'Line of Business']).to_numpy()
-testing_data = model_data['Test'].drop('Fitting Bucket').to_numpy()
+
+def extract_used_columns(df: pl.DataFrame) -> np.ndarray:
+    return df.drop(['Fitting Bucket', 'Line of Business']).to_numpy()
+
+
+def map_numpy_to_keras_data(data: np.ndarray):
+    company_codes: np.ndarray = data[:, 0].reshape(-1, 1).astype(int)
+    loss_paid: np.ndarray = np.vstack(data[:, 1]).reshape((-1, 9, 1))
+    case_reserves: np.ndarray = np.vstack(data[:, 2]).reshape((-1, 9, 1))
+
+    return company_codes, loss_paid, case_reserves
+
+
+def extract_keras_data(df: pl.DataFrame):
+    numpy_data = extract_used_columns(df)
+    return map_numpy_to_keras_data(numpy_data)
+
+
+def get_insurance_line_data(insurance_line: str):
+    # Kevin Kuo combines the train and validation set to be used in training. Then also has early stopping on the
+    # validation set. Very odd but we will do the same.
+    training_data = model_data[('Train', insurance_line)].vstack(model_data[('Validation', insurance_line)])
+    training_data = extract_keras_data(training_data)
+
+    validation_data = extract_keras_data(model_data[('Validation', insurance_line)])
+
+    return training_data, validation_data
