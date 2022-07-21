@@ -28,7 +28,9 @@ def get_decorated_p_triangles(cache: bool = True) -> pl.LazyFrame:
 
     # Split out train and test data
     decorated_df = decorated_df.with_column(
-        pl.when(pl.col('Calender Year') <= 1995)
+        pl.when(pl.col('Development Lag') == 1)
+            .then('Discard')
+            .when(pl.col('Calender Year') <= 1995)
             .then('Train')
             .when(pl.col('Calender Year') <= 1997)
             .then('Validation')

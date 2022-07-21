@@ -35,6 +35,7 @@ _COLUMN_NAMES = (
 
 _SAVED_FILE_NAME = 'SchedulePTriangles.pq'
 
+
 def extract_data(data_url: str) -> pl.DataFrame:
     return pl.read_csv(data_url)
 
@@ -69,13 +70,11 @@ def ETL() -> pl.DataFrame:
     )
 
     # This is just cumulative paid at time t - cumulative paid at time t-1.
-    stacked_data = stacked_data.with_column(
+    stacked_data = stacked_data.sort('Development Lag').with_column(
         (
                 pl.col('Cumulative Paid Loss') -
-                pl.col('Cumulative Paid Loss')
-                .sort_by('Development Lag')
-                .shift_and_fill(periods=1, fill_value=0)
-        ).over(['Group Code', 'Accident Year']).alias('Incremental Paid Loss')
+                pl.col('Cumulative Paid Loss').shift_and_fill(periods=1, fill_value=0)
+        ).over(['Group Code', 'Accident Year', 'Line of Business']).alias('Incremental Paid Loss')
     )
 
     # Down cast some string columns for efficiency
