@@ -69,7 +69,7 @@ keras_data = keras_data.select([
     'Case Reserves: Output'
 ])
 
-model_data = keras_data.collect().partition_by(['Fitting Bucket', 'Line of Business'], as_dict=True)
+model_data = keras_data.collect().partition_by(['Fitting Bucket', 'Line of Business'], as_dict=True, maintain_order=True)
 
 
 def extract_used_columns(df: pl.DataFrame) -> np.ndarray:
@@ -78,10 +78,14 @@ def extract_used_columns(df: pl.DataFrame) -> np.ndarray:
 
 def map_numpy_to_keras_data(data: np.ndarray):
     company_codes: np.ndarray = data[:, 0].reshape(-1, 1).astype(int)
-    loss_paid: np.ndarray = np.vstack(data[:, 1]).reshape((-1, 9, 1))
-    case_reserves: np.ndarray = np.vstack(data[:, 2]).reshape((-1, 9, 1))
+    loss_paid_input: np.ndarray = np.vstack(data[:, 1]).reshape((-1, 9, 1))
+    case_reserves_input: np.ndarray = np.vstack(data[:, 2]).reshape((-1, 9, 1))
 
-    return company_codes, loss_paid, case_reserves
+    loss_paid_output: np.ndarray = np.vstack(data[:, 3]).reshape((-1, 9, 1))
+    case_reserves_output: np.ndarray = np.vstack(data[:, 4]).reshape((-1, 9, 1))
+
+
+    return company_codes, loss_paid_input, case_reserves_input, loss_paid_output, case_reserves_output
 
 
 def extract_keras_data(df: pl.DataFrame):
@@ -97,4 +101,6 @@ def get_insurance_line_data(insurance_line: str):
 
     validation_data = extract_keras_data(model_data[('Validation', insurance_line)])
 
-    return training_data, validation_data
+    test_data = extract_keras_data(model_data[('Train', insurance_line)])
+
+    return training_data, validation_data, test_data
