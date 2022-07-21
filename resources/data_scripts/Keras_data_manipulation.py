@@ -27,15 +27,16 @@ used_companies = pl.DataFrame([
     pl.Series('Group Code', used_companies_raw['Group Code']),
 ]).lazy()
 
-
 keras_data = p_triangle_df.sort('Development Lag').with_columns([
     (
-        pl.concat_list([pl.col('Incremental Paid Loss: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(1, 9 + 1)][::-1])
+        pl.concat_list(
+            [pl.col('Incremental Paid Loss: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(1, 9 + 1)][::-1])
             .alias('Incremental Loss: Input')
     ).over(['Group Code', 'Accident Year', 'Line of Business']),
 
     (
-        pl.concat_list([pl.col('Case Reserves: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(1, 9 + 1)][::-1])
+        pl.concat_list(
+            [pl.col('Case Reserves: Loss Ratio').shift_and_fill(i, _MASK_VALUE) for i in range(1, 9 + 1)][::-1])
             .alias('Case Reserves: Input')
     ).over(['Group Code', 'Accident Year', 'Line of Business']),
 
@@ -56,7 +57,6 @@ used_companies = used_companies.with_column(pl.col('Line of Business').cast(pl.C
 keras_data = keras_data.with_column(pl.col('Line of Business').cast(pl.Categorical))
 
 keras_data = used_companies.join(keras_data, on=['Line of Business', 'Group Code'])
-
 
 keras_data = keras_data.select([
     'Line of Business',
