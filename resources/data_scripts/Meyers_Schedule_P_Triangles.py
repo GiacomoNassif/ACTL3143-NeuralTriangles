@@ -35,6 +35,7 @@ _COLUMN_NAMES = (
 
 _SAVED_FILE_NAME = 'SchedulePTriangles.pq'
 
+
 def extract_data(data_url: str) -> pl.DataFrame:
     return pl.read_csv(data_url)
 
@@ -95,4 +96,3 @@ def get_schedule_P_triangle_data(cache: bool = True) -> pl.LazyFrame:
         data.write_parquet('./resources/data/SchedulePTriangles.pq')
 
     return data.lazy()
-
